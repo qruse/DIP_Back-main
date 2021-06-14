@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  flask:
+    build:
+      context: .
+      dockerfile: ./flask/Dockerfile
+    container_name: flask_backend_dip
+    #ports:
+    #  - "5000:5000"
+    expose:
+      - 8080  
+    networks:
+      dipnet:
+        ipv4_address: 172.20.18.04
+  nginx:
+    build: ./nginx
+    container_name: nginx_backend_dip
+    ports:
+    - "5000:5000"
+    networks:
+      dipnet:
+        ipv4_address: 172.20.18.03
+  db:
+    #image: postgres:latest
+    build:
+      context: .
+      dockerfile: ./postgres/Dockerfile
+    restart: unless-stopped
+    container_name: db_backend_dip
+    #volumes:
+     # - ./database:/var/lib/postgresql/data
+    #command:
+      #- /bin/bash /tmp/csvimport.sh
+      #- psql -U postgres -d postgres -a -f /tmp/dbsql/dip_library.sql # Database 생성 및 data copy
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    #ports:
+    #  - "5432:5432"
+    networks:
+      dipnet:
+        ipv4_address: 172.20.18.02
+volumes:
+  postgres-data:
+networks:
+    dipnet:
+        ipam:
+            driver: default
+            config:
+            - subnet: 172.20.18.0/24
